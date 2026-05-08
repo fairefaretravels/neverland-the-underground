@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEVERLAND — Chapter One: First Flight</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0806;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;padding:1.5rem}
+h1{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#c8a96e;margin-bottom:4px;text-align:center}
+h2{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#555;margin-bottom:14px;text-align:center}
+.stage{position:relative;width:340px;height:555px;background:#000;border-radius:10px;overflow:hidden;border:2px solid #2a1800;box-shadow:0 0 60px rgba(0,0,0,0.9)}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 0.75s ease}
+.slide.active{opacity:1}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+.narr{position:absolute;top:14px;left:14px;right:14px;background:rgba(245,240,216,0.96);border:2px solid #2a1800;padding:7px 11px;font-size:12px;font-weight:700;color:#1a0d00;font-style:italic;line-height:1.4;z-index:10}
+.pbar-wrap{width:340px;height:4px;background:rgba(200,169,110,0.15);margin-top:10px;border-radius:2px}
+.pbar{height:100%;background:#c8a96e;border-radius:2px;transition:width 0.15s linear}
+.panel-title{font-size:10px;color:#666;margin-top:7px;text-align:center;min-height:14px;letter-spacing:.5px}
+.ctrl{display:flex;align-items:center;gap:10px;margin-top:12px}
+.cb{background:#1a1008;color:#c8a96e;border:1px solid #c8a96e;padding:7px 18px;border-radius:5px;cursor:pointer;font-size:11px;letter-spacing:.5px;transition:background .2s}
+.cb:hover{background:#2a1f0a}
+.cb:disabled{opacity:.25;cursor:default}
+.play-btn{background:#c8a96e;color:#0a0806;border:none;padding:8px 26px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:700;min-width:100px;letter-spacing:.5px;transition:background .2s}
+.play-btn:hover{background:#d4b87a}
+.spd-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.spd-lbl{font-size:10px;color:#555;letter-spacing:1px}
+.spd-btn{background:transparent;border:1px solid #333;color:#666;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:10px;transition:all .2s}
+.spd-btn:hover{border-color:#c8a96e;color:#c8a96e}
+.spd-btn.on{border-color:#c8a96e;color:#c8a96e;background:rgba(200,169,110,0.08)}
+.counter{font-size:10px;color:#444;margin-top:6px;text-align:center}
+</style>
+</head>
+<body>
+<h1>Neverland</h1>
+<h2>Chapter One: First Flight</h2>
+<div class="stage" id="stage"></div>
+<div class="pbar-wrap"><div class="pbar" id="pbar"></div></div>
+<div class="panel-title" id="ptitle"></div>
+<div class="counter" id="counter"></div>
+<div class="ctrl">
+  <button class="cb" id="pbtn" onclick="go(-1)">← Prev</button>
+  <button class="play-btn" id="playbtn" onclick="togglePlay()">▶ Play</button>
+  <button class="cb" id="nbtn" onclick="go(1)">Next →</button>
+</div>
+<div class="spd-row">
+  <span class="spd-lbl">Speed</span>
+  <button class="spd-btn" onclick="setSpd(4000,this)">Slow</button>
+  <button class="spd-btn on" onclick="setSpd(2000,this)">Med</button>
+  <button class="spd-btn" onclick="setSpd(1000,this)">Fast</button>
+  <button class="spd-btn" onclick="setSpd(500,this)">Rapid</button>
+</div>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   GITHUB PAGES SETUP:
+   1. Create a repo called  neverland-ch1
+   2. Save this file as  index.html  in the root
+   3. Create a folder called  images/  and upload ALL panel images into it
+   4. Change imgFolder below from "" to "images/"
+   5. In repo Settings → Pages → set source to main branch, root
+   6. Your live URL will be:  https://YOUR-USERNAME.github.io/neverland-ch1
+───────────────────────────────────────────────────────────── */
+const imgFolder = "images/";
+
+const P = [
+  {t:"Seneca — The Call",nr:"Yeah, Tony. I got something for you.",i:"IMG_8159.jpeg"},
+  {t:"Seneca — The Studio",i:"IMG_8178.jpeg"},
+  {t:"First Listen — The Doubt",nr:"What if I can't find it this time?",i:"IMG_8154.jpeg"},
+  {t:"Second Listen — The Pen Moves",i:"IMG_8155.jpeg"},
+  {t:"Third Listen — Locked In",i:"IMG_8158.jpeg"},
+  {t:"Seneca — Standing in the Studio",i:"IMG_8161.jpeg"},
+  {t:"Seneca — Outside the Booth (Wide)",i:"IMG_8163.jpeg"},
+  {t:"Seneca — Outside the Booth",i:"IMG_8164.jpeg"},
+  {t:"Seneca — The Vocal Booth",i:"IMG_8167.jpeg"},
+  {t:"The Switchblades — Studio Noir",i:"IMG_8175.jpeg"},
+  {t:"You Ready!",nr:"Liah: You ready!   Seneca: Add that one part first.",i:"IMG_8179.jpeg"},
+  {t:"Lost Boys — Belle Isle",nr:"They called it freedom. Hook called it a leash.",i:"IMG_8184.png"},
+  {t:"Peter Among Them",nr:"For one night, Neverland could wait.",i:"IMG_8196.png"},
+  {t:"Peter — The Approach",i:"IMG_8202.png"},
+  {t:"First Eye Contact",i:"IMG_8199.png"},
+  {t:"First Eye Contact II",i:"IMG_8215.png"},
+  {t:"Peter — Character Lock",i:"IMG_8205.png"},
+  {t:"The Watcher",i:"IMG_8207.png"},
+  {t:"Isolation. Watching the world burn.",i:"IMG_8208.png"},
+  {t:"The Instigator",i:"IMG_8209.png"},
+  {t:"The Quiet One",i:"IMG_8210.png"},
+  {t:"The Crowd Comes Into View",i:"IMG_8212.png"},
+  {t:"Moving Through the Dark",nr:"Nobody said follow me. They just did.",i:"IMG_8216.png"},
+  {t:"They Hear It",nr:"The beat found them first.",i:"IMG_8217.png"},
+  {t:"The Circle Opens",nr:"He'd seen a lot of things in this city. He hadn't seen this.",i:"IMG_8218.png"},
+  {t:"Liah Lazer — In the Cypher",i:"IMG_8252.png"},
+  {t:"Seneca — Mid Verse",i:"IMG_8234.png"},
+  {t:"Peter's Face",nr:"Something just shifted. He didn't have a word for it yet.",i:"IMG_8221.png"},
+  {t:"The Watcher — Mesmerized",nr:"He'd never been afraid of anything in Neverland. This was different.",i:"IMG_8224.png"},
+  {t:"The Watcher Speaks",i:"IMG_8228.png"},
+  {t:"The Instigator Grin Returns",nr:"Yeah. They are.",i:"IMG_8229.png"},
+  {t:"Yeah. They Are.",i:"IMG_8230.png"},
+  {t:"Liah — The Almost Smile",i:"IMG_8257.png"},
+  {t:"Seneca & Peter — Eye Contact",i:"IMG_8237.png"},
+  {t:"The Crowd Erupts",i:"IMG_8242.png"},
+  {t:"The Cypher Broke Open",nr:"The cypher broke open. The night rushed back in.",i:"IMG_8241.png"},
+  {t:"Peter Doesn't Move",nr:"Everybody else knew what to do next. He didn't.",i:"IMG_8243.png"},
+  {t:"Liah Notices",i:"IMG_8249.png"},
+  {t:"Peter Speaks First",nr:"Y'all were cold out there. Both of you.",i:"IMG_8251.png"},
+  {t:"Seneca Breaks Eye Contact",nr:"She filed it away. She'd deal with it later.",i:"IMG_8239.png"},
+  {t:"Seneca's Answer",nr:"And just like that — the door opened. Just a little.",i:"IMG_8253.png"},
+  {t:"First Flight — End",nr:"NEVERLAND. CHAPTER ONE: FIRST FLIGHT. END.",i:"IMG_8261.png"},
+  {t:"First Flight — End",nr:"NEVERLAND. CHAPTER ONE: FIRST FLIGHT. END.",i:"IMG_8258.png"},
+];
+
+const stage=document.getElementById('stage');
+let cur=0,playing=false,timer=null,spd=2000;
+
+P.forEach((p,i)=>{
+  const d=document.createElement('div');
+  d.className='slide'+(i===0?' active':'');
+  d.id='s'+i;
+  const img=document.createElement('img');
+  img.src=imgFolder+p.i;
+  img.alt=p.t;
+  d.appendChild(img);
+  if(p.nr){const n=document.createElement('div');n.className='narr';n.textContent=p.nr;d.appendChild(n);}
+  stage.appendChild(d);
+});
+
+function show(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  cur=(n+P.length)%P.length;
+  document.getElementById('s'+cur).classList.add('active');
+  document.getElementById('pbar').style.width=((cur+1)/P.length*100).toFixed(1)+'%';
+  document.getElementById('ptitle').textContent=P[cur].t;
+  document.getElementById('counter').textContent='Panel '+(cur+1)+' of '+P.length;
+  document.getElementById('pbtn').disabled=cur===0;
+  document.getElementById('nbtn').disabled=cur===P.length-1;
+}
+
+function go(d){show(cur+d);}
+
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('playbtn').textContent=playing?'⏸ Pause':'▶ Play';
+  if(playing){
+    timer=setInterval(()=>{
+      if(cur>=P.length-1){clearInterval(timer);playing=false;document.getElementById('playbtn').textContent='▶ Play';return;}
+      show(cur+1);
+    },spd);
+  } else {clearInterval(timer);}
+}
+
+function setSpd(s,btn){
+  spd=s;
+  document.querySelectorAll('.spd-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(playing){clearInterval(timer);timer=setInterval(()=>{if(cur>=P.length-1){clearInterval(timer);playing=false;document.getElementById('playbtn').textContent='▶ Play';return;}show(cur+1);},spd);}
+}
+
+show(0);
+</script>
+</body>
+</html>
