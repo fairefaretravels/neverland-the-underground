@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEVERLAND — Chapter One: First Flight</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  font-family:'Oswald',Arial,sans-serif;
+  padding:1.5rem;
+}
+
+/* COVER */
+#cover-screen{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  transition:opacity 1s ease;
+  cursor:pointer;
+}
+#cover-screen.fade-out{opacity:0;pointer-events:none;}
+#cover-img{width:100%;height:100vh;object-fit:cover;display:block;}
+.tap-hint{
+  position:absolute;
+  bottom:24px;
+  font-size:9px;
+  letter-spacing:4px;
+  color:rgba(200,169,110,0.7);
+  text-transform:uppercase;
+  animation:blink 1.5s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* MAIN PLAYER */
+#main-player{opacity:0;transition:opacity 1s ease;}
+#main-player.visible{opacity:1;}
+
+.header{
+  width:340px;
+  background:#000;
+  border:2px solid #c8a96e;
+  border-bottom:none;
+  padding:14px 16px 12px;
+  text-align:center;
+}
+.header-title{
+  font-family:'Oswald',sans-serif;
+  font-size:46px;
+  font-weight:700;
+  color:#fff;
+  letter-spacing:6px;
+  text-transform:uppercase;
+  text-shadow:2px 2px 0 #c8a96e;
+  line-height:1;
+}
+.header-sub{
+  font-size:10px;
+  letter-spacing:4px;
+  color:#888;
+  text-transform:uppercase;
+  margin-top:4px;
+}
+.header-chapter{
+  font-size:9px;
+  letter-spacing:3px;
+  color:#c8a96e;
+  text-transform:uppercase;
+  margin-top:6px;
+}
+.header-tagline{
+  font-size:10px;
+  font-style:italic;
+  color:#666;
+  margin-top:6px;
+  letter-spacing:1px;
+}
+
+/* STAGE */
+.stage{
+  position:relative;
+  width:340px;
+  height:555px;
+  background:#000;
+  overflow:hidden;
+  border-left:2px solid #c8a96e;
+  border-right:2px solid #c8a96e;
+}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease;}
+.slide.active{opacity:1;}
+.slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.act-label{
+  position:absolute;
+  bottom:12px;
+  left:12px;
+  background:rgba(0,0,0,0.85);
+  border:1px solid #c8a96e;
+  color:#c8a96e;
+  font-size:8px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:3px 8px;
+  z-index:10;
+}
+
+/* BOTTOM BAR */
+.bottom-bar{
+  width:340px;
+  background:#0a0806;
+  border:2px solid #c8a96e;
+  border-top:none;
+  padding:12px 14px;
+}
+.pbar-wrap{width:100%;height:3px;background:rgba(200,169,110,0.15);border-radius:2px;margin-bottom:10px;}
+.pbar{height:100%;background:linear-gradient(90deg,#8b6914,#c8a96e);border-radius:2px;transition:width 0.1s linear;width:0%;}
+.panel-info{display:flex;justify-content:space-between;margin-bottom:10px;}
+.panel-title{font-size:10px;color:#666;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px;}
+.counter{font-size:10px;color:#444;}
+.ctrl{display:flex;gap:8px;margin-bottom:10px;}
+.cb{
+  background:transparent;
+  color:#c8a96e;
+  border:1px solid #c8a96e;
+  padding:7px 0;
+  border-radius:3px;
+  cursor:pointer;
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:1px;
+  flex:1;
+  transition:background .2s;
+}
+.cb:hover{background:rgba(200,169,110,0.08);}
+.cb:disabled{opacity:.2;cursor:default;}
+.play-btn{
+  background:#c8a96e;
+  color:#000;
+  border:none;
+  padding:8px 0;
+  border-radius:3px;
+  cursor:pointer;
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  flex:2;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:background .2s;
+}
+.play-btn:hover{background:#d4b87a;}
+.spd-row{display:flex;align-items:center;gap:6px;}
+.spd-lbl{font-size:9px;color:#444;letter-spacing:2px;text-transform:uppercase;}
+.spd-btn{
+  background:transparent;
+  border:1px solid #2a2a2a;
+  color:#555;
+  padding:3px 0;
+  border-radius:2px;
+  cursor:pointer;
+  font-family:'Oswald',sans-serif;
+  font-size:9px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  flex:1;
+  transition:all .2s;
+}
+.spd-btn:hover{border-color:#c8a96e;color:#c8a96e;}
+.spd-btn.on{border-color:#c8a96e;color:#c8a96e;background:rgba(200,169,110,0.08);}
+.audio-note{font-size:9px;color:#444;text-align:center;margin-top:8px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div id="cover-screen">
+  <img id="cover-img" src="images/IMG_8284.jpeg" alt="NEVERLAND">
+  <div class="tap-hint">Tap to begin</div>
+</div>
+
+<!-- PLAYER -->
+<div id="main-player">
+
+  <div class="header">
+    <div class="header-title">NEVERLAND</div>
+    <div class="header-sub">The Underground</div>
+    <div class="header-chapter">Chapter One &nbsp; First Flight</div>
+    <div class="header-tagline">"Every fairy tale has a Hook."</div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="bottom-bar">
+    <div class="pbar-wrap"><div class="pbar" id="pbar"></div></div>
+    <div class="panel-info">
+      <div class="panel-title" id="ptitle">—</div>
+      <div class="counter" id="counter">1 / 44</div>
+    </div>
+    <div class="ctrl">
+      <button class="cb" id="pbtn" onclick="go(-1)">PREV</button>
+      <button class="play-btn" id="playbtn" onclick="togglePlay()">PLAY</button>
+      <button class="cb" id="nbtn" onclick="go(1)">NEXT</button>
+    </div>
+    <div class="spd-row">
+      <span class="spd-lbl">Speed</span>
+      <button class="spd-btn" onclick="setSpd(4000,this)">Slow</button>
+      <button class="spd-btn on" onclick="setSpd(2000,this)">Med</button>
+      <button class="spd-btn" onclick="setSpd(1000,this)">Fast</button>
+      <button class="spd-btn" onclick="setSpd(500,this)">Rapid</button>
+    </div>
+    <div class="audio-note" id="audionote">Loading audio...</div>
+    <a href="story.html" style="display:block;margin-top:10px;background:transparent;border:1px solid #c8a96e;color:#c8a96e;text-align:center;padding:8px 0;border-radius:3px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(200,169,110,0.08)'" onmouseout="this.style.background='transparent'">Read the Story</a>
+  </div>
+
+</div>
+
+<!-- AUDIO — tries both capitalizations -->
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const imgFolder = "images/";
+
+const P = [
+  {t:"Seneca — The Call",                   i:"IMG_8214.jpeg"},
+  {t:"Seneca — The Studio",                 i:"IMG_8178.jpeg"},
+  {t:"First Listen — The Doubt",            i:"IMG_8154.jpeg"},
+  {t:"Second Listen — The Pen Moves",       i:"IMG_8155.jpeg"},
+  {t:"Third Listen — Locked In",            i:"IMG_8158.jpeg"},
+  {t:"Seneca — Standing in the Studio",     i:"IMG_8161.jpeg"},
+  {t:"Seneca — Outside the Booth (Wide)",   i:"IMG_8163.jpeg"},
+  {t:"Seneca — Outside the Booth",          i:"IMG_8164.jpeg"},
+  {t:"Seneca — The Vocal Booth",            i:"IMG_8167.jpeg"},
+  {t:"The Switchblades — Studio Noir",      i:"IMG_8175.jpeg"},
+  {t:"You Ready!",                          i:"IMG_8179.jpeg"},
+  {t:"Lost Boys — Belle Isle",              i:"IMG_8184.png"},
+  {t:"Peter Among Them",                    i:"IMG_8196.png"},
+  {t:"Peter — The Approach",                i:"IMG_8202.png"},
+  {t:"First Eye Contact",                   i:"IMG_8199.png"},
+  {t:"First Eye Contact II",                i:"IMG_8215.png"},
+  {t:"Peter — Character Lock",              i:"IMG_8205.png"},
+  {t:"The Watcher",                         i:"IMG_8207.png"},
+  {t:"Isolation. Watching the world burn.", i:"IMG_8208.png"},
+  {t:"The Instigator",                      i:"IMG_8209.png"},
+  {t:"The Quiet One",                       i:"IMG_8210.png"},
+  {t:"The Crowd Comes Into View",           i:"IMG_8212.png"},
+  {t:"Moving Through the Dark",             i:"IMG_8216.png"},
+  {t:"They Hear It",                        i:"IMG_8217.png"},
+  {t:"The Circle Opens",                    i:"IMG_8218.png"},
+  {t:"Liah Lazer — Windy",                  i:"IMG_8252.png"},
+  {t:"Tink — Mid Verse",                    i:"IMG_8234.png"},
+  {t:"Peter's Face",                        i:"IMG_8221.png"},
+  {t:"The Watcher — Mesmerized",            i:"IMG_8224.png"},
+  {t:"The Watcher Speaks",                  i:"IMG_8228.png"},
+  {t:"The Instigator Grin Returns",         i:"IMG_8229.png"},
+  {t:"Yeah. They Are.",                     i:"IMG_8230.png"},
+  {t:"Windy — The Almost Smile",            i:"IMG_8257.png"},
+  {t:"Tink & Peter — Eye Contact",          i:"IMG_8237.png"},
+  {t:"The Crowd Erupts",                    i:"IMG_8242.png"},
+  {t:"The Cypher Broke Open",               i:"IMG_8241.png"},
+  {t:"Peter Doesn't Move",                  i:"IMG_8243.png"},
+  {t:"Windy Notices",                       i:"IMG_8249.png"},
+  {t:"Peter Speaks First",                  i:"IMG_8251.png"},
+  {t:"Tink Breaks Eye Contact",             i:"IMG_8239.png"},
+  {t:"Tink's Answer",                       i:"IMG_8253.png"},
+  {t:"DJ Meow Meow — The DJ of the Underworld",     i:"IMG_8265.png"},
+  {t:"First Flight — End",                  i:"IMG_8264.png"},
+  {t:"First Flight — End",                  i:"IMG_8225.png"},
+];
+
+const ACT = {
+  0:"Act I — The Studio",
+  11:"Act II — Belle Isle",
+  21:"Act III — The Cypher",
+  34:"Act IV — The Close"
+};
+
+const stage = document.getElementById('stage');
+const audio = document.getElementById('audio');
+const audioNote = document.getElementById('audionote');
+const coverScreen = document.getElementById('cover-screen');
+const mainPlayer = document.getElementById('main-player');
+let cur=0, playing=false, timer=null, manualSpd=2000, audioReady=false;
+
+// build slides
+P.forEach((p,i)=>{
+  const d = document.createElement('div');
+  d.className = 'slide' + (i===0 ? ' active' : '');
+  d.id = 's'+i;
+  const img = document.createElement('img');
+  img.src = imgFolder + p.i;
+  img.alt = p.t;
+  d.appendChild(img);
+  stage.appendChild(d);
+});
+
+// act labels
+Object.entries(ACT).forEach(([idx,label])=>{
+  const s = document.getElementById('s'+idx);
+  if(s){ const a=document.createElement('div'); a.className='act-label'; a.textContent=label; s.appendChild(a); }
+});
+
+// cover tap
+coverScreen.addEventListener('click', ()=>{
+  coverScreen.classList.add('fade-out');
+  setTimeout(()=>{ coverScreen.style.display='none'; mainPlayer.classList.add('visible'); }, 1000);
+});
+
+// try both capitalizations for audio
+function tryAudio(paths, idx){
+  if(idx >= paths.length){ audioNote.textContent='Add Neverland.mp3 to your audio/ folder'; return; }
+  audio.src = paths[idx];
+  audio.load();
+  audio.oncanplaythrough = ()=>{
+    audioReady = true;
+    const m=Math.floor(audio.duration/60);
+    const s=Math.floor(audio.duration%60).toString().padStart(2,'0');
+    audioNote.textContent='Neverland  '+m+':'+s+'  —  '+P.length+' panels';
+  };
+  audio.onerror = ()=>{ tryAudio(paths, idx+1); };
+}
+tryAudio(['audio/Neverland.mp3','audio/neverland.mp3','audio/Neverland.m4a','audio/neverland.m4a'], 0);
+
+// audio sync
+audio.addEventListener('timeupdate', ()=>{
+  if(audioReady && audio.duration){
+    document.getElementById('pbar').style.width = (audio.currentTime/audio.duration*100).toFixed(1)+'%';
+    const tp = Math.min(Math.floor((audio.currentTime/audio.duration)*P.length), P.length-1);
+    if(tp !== cur) showPanel(tp);
+  }
+});
+
+audio.addEventListener('ended', ()=>{
+  clearInterval(timer); playing=false;
+  document.getElementById('playbtn').textContent='PLAY';
+});
+
+function showPanel(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  cur = (n+P.length) % P.length;
+  document.getElementById('s'+cur).classList.add('active');
+  if(!audioReady) document.getElementById('pbar').style.width=((cur+1)/P.length*100).toFixed(1)+'%';
+  document.getElementById('ptitle').textContent = P[cur].t;
+  document.getElementById('counter').textContent = (cur+1)+' / '+P.length;
+  document.getElementById('pbtn').disabled = cur===0;
+  document.getElementById('nbtn').disabled = cur===P.length-1;
+}
+
+function go(d){
+  if(audioReady && !audio.paused){
+    const t=cur+d; if(t<0||t>=P.length)return;
+    audio.currentTime=(t/P.length)*audio.duration;
+  } else { showPanel(cur+d); }
+}
+
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('playbtn').textContent=playing?'PAUSE':'PLAY';
+  if(playing){
+    if(audioReady){ audio.play(); }
+    else {
+      timer=setInterval(()=>{
+        if(cur>=P.length-1){clearInterval(timer);playing=false;document.getElementById('playbtn').textContent='PLAY';return;}
+        showPanel(cur+1);
+      }, manualSpd);
+    }
+  } else { audio.pause(); clearInterval(timer); }
+}
+
+function setSpd(s,btn){
+  manualSpd=s;
+  document.querySelectorAll('.spd-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(playing && !audioReady){
+    clearInterval(timer);
+    timer=setInterval(()=>{
+      if(cur>=P.length-1){clearInterval(timer);playing=false;document.getElementById('playbtn').textContent='PLAY';return;}
+      showPanel(cur+1);
+    }, manualSpd);
+  }
+}
+
+showPanel(0);
+</script>
+</body>
+</html>
